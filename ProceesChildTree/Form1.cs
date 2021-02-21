@@ -67,7 +67,7 @@ namespace ProceesChildTree
         {
             var itemNode = new TreeNode();
             var findTreeNodes2 = treeView1.Nodes.Find(itemNode.Name, true);//грузим всю индексацию дерева
-       
+            bool find = false;
             Process process = tag as Process;//этого можно было не делать но так проще отлаживать.Так что пометим это как МАГИЯ НЕ ТРОГАТЬ
             //если дерево пусто и родительский процесс не закрыт
             if (findTreeNodes2.Length==0 && process!=null)
@@ -87,37 +87,38 @@ namespace ProceesChildTree
             //если в дереве уже что то есть 
             else if(process!=null && findTreeNodes2.Length>0)
             {
+
                 foreach (var item in findTreeNodes2)
                 {
                     var n = item.Tag as Process;//так как у нас в узлах обьекты приводим тип к процессу
                     //ищем совпадение по родителььскому id 
                     if (process.Id == n.Id)//если текущий процесс дочерний то добавляем его 
-                    {
-                       
+                    {                     
                         TreeNode newNode = new TreeNode();
                         newNode.Tag = child;
                         newNode.Text = child.ProcessName;
                         item.Nodes.Add(newNode);
+                        find = true;
                         break;
-                    }
-                    else//если родитель не найден то это говорит что процесс главный делаем его родителем а его процесс дочерним
-                    {
-                        TreeNode newNode = new TreeNode();
-                        newNode.Tag = process;
-                        newNode.Text = process.ProcessName;
-
-                        TreeNode newNode1 = new TreeNode();
-                        newNode1.Tag = child;
-                        newNode1.Text = child.ProcessName;
-                        newNode.Nodes.Add(newNode1);
-                        treeView1.Nodes.Add(newNode);
-
-                    }
+                    }                  
 
                 }
+              
             }
-           
-          
+            if (find == false && findTreeNodes2.Length>0 && process!=null)//если родитель не найден то это говорит что процесс главный делаем его родителем а его процесс дочерним
+            {
+                TreeNode newNode = new TreeNode();
+                newNode.Tag = process;
+                newNode.Text = process.ProcessName;
+
+                TreeNode newNode1 = new TreeNode();
+                newNode1.Tag = child;
+                newNode1.Text = child.ProcessName;
+                newNode.Nodes.Add(newNode1);
+                treeView1.Nodes.Add(newNode);
+
+            }
+
         }
         /// <summary>
         /// метод определяет кто родитель процесса
@@ -155,7 +156,7 @@ namespace ProceesChildTree
             Process[] process = Process.GetProcesses();
 
             //берем всего 20 процессов так как процессов очень много, а кофе заваривать я уже устал
-            for (int i = 0; i < 20; i++)
+            for (int i = 0; i < process.Length; i++)
             {
                 Process parentFind = GiveParent(process[i]);
                 serchNode(parentFind, process[i]);
